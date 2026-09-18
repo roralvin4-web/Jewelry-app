@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ကျောက်မျက်/ပန်းထိမ် အပ်ထည် စာရင်းကိုင်စနစ်</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Myanmar Text -->
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Pyidaungsu:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Pyidaungsu', 'Padauk', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom Scrollbar for Desktop Tables */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+                padding: 0 !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .custom-table th, .custom-table td {
+                border: 1px solid #000000 !important;
+                padding: 6px 8px !important;
+                font-size: 11pt !important;
+            }
+        }
+
+        /* Black borders matching traditional Myanmar accounting log sheets */
+        .custom-table {
+            border-collapse: collapse;
+        }
+        .custom-table th, .custom-table td {
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 text-slate-800 min-h-screen">
+
+<div class="max-w-7xl mx-auto space-y-5 print-container">
+
+    <div class="no-print bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-500 text-white p-3 rounded-xl shadow-sm">
+                <i class="fa-solid fa-gem text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">ကျောက်မျက်/ပန်းထိမ် အပ်ထည် စာရင်းကိုင် စနစ်</h1>
+                <p class="text-xs sm:text-sm text-slate-500">လက်တော့ သို့မဟုတ် ဖုန်းများဖြင့် အလွယ်တကူ စာရင်းသွင်း စီမံနိုင်သည်</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="exportToCSV()" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-excel"></i>
+                Excel ထုတ်ယူမည်
+            </button>
+            <button onclick="window.print()" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-print"></i>
+                စာရွက်ထုတ်မည် (Print/PDF)
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-[#ffff00] border-2 border-black p-3 sm:p-4 text-center rounded-xl shadow-sm relative group transition-all">
+        <div class="flex items-center justify-center gap-2">
+            <input 
+                type="text" 
+                id="shopTitle" 
+                value="ဦးနိုင် ပန်းထိမ် အပ်ထည်စာရင်းများ" 
+                onchange="saveTitle(this.value)"
+                class="bg-transparent text-center font-bold text-lg sm:text-2xl md:text-3xl text-black w-full focus:outline-none focus:bg-yellow-200/80 rounded-lg px-2 py-1 transition"
+                title="ဆိုင်အမည် ပြောင်းရန် ဤနေရာတွင် နှိပ်၍ ပြင်ပါ"
+            >
+        </div>
+        <span class="no-print absolute right-3 top-3 text-xs text-slate-700 opacity-70 group-hover:opacity-100 transition flex items-center gap-1 bg-yellow-200/80 px-2 py-1 rounded-md">
+            <i class="fa-solid fa-pen-to-square"></i> ခေါင်းစဉ်ပြင်ရန်
+        </span>
+    </div>
+
+    <div class="no-print grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-slate-500">စုစုပေါင်း အပ်ထည်များ</p>
+                <h3 class="text-2xl font-bold text-slate-800 mt-1" id="countAll">0</h3>
+            </div>
+            <div class="bg-slate-100 text-slate-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-list"></i>
+            </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm flex items-center justify-between bg-gradient-to-br from-amber-50/50 to-white">
+            <div>
+                <p class="text-xs font-semibold text-amber-700">⏳ မပြီးသေးသော အပ်ထည်များ</p>
+                <h3 class="text-2xl font-bold text-amber-800 mt-1" id="countPending">0</h3>
+            </div>
+            <div class="bg-amber-100 text-amber-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex items-center justify-between bg-gradient-to-br from-emerald-50/50 to-white">
+            <div>
+                <p class="text-xs font-semibold text-emerald-700">✓ ပြီးစီးပြီးသော အပ်ထည်များ</p>
+                <h3 class="text-2xl font-bold text-emerald-800 mt-1" id="countCompleted">0</h3>
+            </div>
+            <div class="bg-emerald-100 text-emerald-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-print bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2" id="formHeaderTitle">
+                <i class="fa-solid fa-plus-circle text-amber-500"></i> အပ်ထည်စာရင်းသစ် ထည့်သွင်းရန်
+            </h2>
+            <button type="button" id="cancelEditBtn" onclick="resetFormUI()" class="hidden text-xs text-slate-500 hover:text-slate-800 underline">
+                မပြင်တော့ပါ (မူလအတိုင်းထားမည်)
+            </button>
+        </div>
+
+        <form id="orderForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Date (ရက်စွဲ) <span class="text-red-500">*</span></label>
+                <input type="date" id="inputDate" required class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Name (အမည်) <span class="text-red-500">*</span></label>
+                <input type="text" id="inputName" placeholder="အပ်သူ/ဝယ်သူ အမည်" required class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Sizes (ဆိုဒ်)</label>
+                <input type="text" id="inputSize" placeholder="ဥပမာ - 14, 1.5, 17" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Gems (ကျောက်အမျိုးအစား / အသေးစိတ်)</label>
+                <input type="text" id="inputGems" placeholder="ဥပမာ - စိန် ၅ ပွင့်၊ ပတ္တမြား" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Phone no; (ဖုန်းနံပါတ်)</label>
+                <input type="tel" id="inputPhone" placeholder="09xxxxxxxxx" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Status (အခြေအနေ)</label>
+                <select id="inputStatus" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition">
+                    <option value="pending">⏳ မပြီးသေးပါ (Pending)</option>
+                    <option value="completed">✓ ပြီးပြီ (Completed)</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Photo (ဓာတ်ပုံ တင်ရန်)</label>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="inputPhoto" accept="image/*" onchange="previewImage(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 transition cursor-pointer">
+                    <div id="imagePreviewThumb" class="hidden shrink-0">
+                        <img id="thumbImg" src="" class="h-10 w-10 object-cover rounded-lg border border-slate-300">
+                    </div>
+                </div>
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-4 flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-floppy-disk"></i> စာရင်းသစ် ထည့်သွင်းမည်
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="no-print bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <!-- Search Field -->
+        <div class="relative flex-1 max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input 
+                type="text" 
+                id="searchQuery" 
+                oninput="handleSearch()"
+                placeholder="အမည် သို့မဟုတ် ဖုန်းနံပါတ်ဖြင့် ရှာဖွေပါ..." 
+                class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition"
+            >
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <span class="text-xs font-bold text-slate-500 whitespace-nowrap mr-1">စစ်ထုတ်ရန်:</span>
+            <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-xl border text-xs font-semibold bg-amber-500 text-white border-amber-500 shadow-sm transition">
+                အားလုံး
+            </button>
+            <button onclick="setFilter('pending')" id="filterPending" class="px-3 py-1.5 rounded-xl border text-xs font-semibold bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50 transition">
+                ⏳ မပြီးသေး
+            </button>
+            <button onclick="setFilter('completed')" id="filterCompleted" class="px-3 py-1.5 rounded-xl border text-xs font-semibold bg-slate-100 text-slate-700 border-slate-200 hover:bg-emerald-50 transition">
+                ✓ ပြီးပြီ
+            </button>
+        </div>
+
+        <!-- Delete Action Buttons -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="deleteSelected()" id="deleteSelectedBtn" class="hidden bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-trash-can"></i> ရွေးထားသည်များ ဖျက်မည် (<span id="selectedCount">0</span>)
+            </button>
+            <button onclick="deleteAllCompleted()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-broom"></i> ပြီးစီးပြီးသားများ အားလုံးဖျက်မည်
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-5 overflow-hidden">
+        <div class="overflow-x-auto min-h-[300px]">
+            <table class="w-full text-center custom-table text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-900 font-bold text-xs uppercase tracking-wider">
+                        <th class="py-3 px-2 w-10 no-print">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="rounded cursor-pointer w-4 h-4 accent-amber-500">
+                        </th>
+                        <th class="py-3 px-3 w-28">Date</th>
+                        <th class="py-3 px-3 min-w-[130px]">Name</th>
+                        <th class="py-3 px-2 w-20">Sizes</th>
+                        <th class="py-3 px-3 min-w-[140px]">Gems</th>
+                        <th class="py-3 px-2 w-24">Photo</th>
+                        <th class="py-3 px-3 w-32">Phone no;</th>
+                        <th class="py-3 px-3 w-32">Status</th>
+                        <th class="py-3 px-2 w-24 no-print">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-slate-200">
+                    <!-- Dynamic JavaScript Rendering -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty Data Placeholder -->
+        <div id="emptyMessage" class="text-center py-12 text-slate-400 space-y-3 hidden">
+            <i class="fa-solid fa-box-open text-4xl text-slate-300"></i>
+            <p class="text-xs sm:text-sm font-medium">အပ်ထည် စာရင်းများ မရှိသေးပါ။ အထက်ပါ ဖောင်တွင် စာရင်းသစ် စတင်ထည့်သွင်းပါ။</p>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Fullscreen Image Preview Modal -->
+<div id="imageModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print" onclick="closeModal()">
+    <div class="max-w-3xl max-h-[90vh] bg-white p-3 rounded-2xl relative shadow-2xl" onclick="event.stopPropagation()">
+        <button onclick="closeModal()" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white rounded-full w-9 h-9 font-bold text-lg shadow-lg flex items-center justify-center transition">✕</button>
+        <img id="modalImg" src="" alt="Jewelry Photo" class="max-h-[80vh] w-auto mx-auto rounded-xl object-contain">
+    </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+        <div class="flex items-center gap-3 text-red-600">
+            <div class="bg-red-100 p-2.5 rounded-xl">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900" id="confirmModalTitle">စာရင်း ဖျက်ရန် အတည်ပြုပါ</h3>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" id="confirmModalMsg">ဤစာရင်းကို ဖျက်ပစ်ရန် သေချာပါသလား?</p>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs sm:text-sm transition">
+                မဖျက်တော့ပါ
+            </button>
+            <button id="confirmModalBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow-md">
+                ဖျက်မည်
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initial State & Mock Data for Laptop Testing
+    let orders = JSON.parse(localStorage.getItem('jewel_orders_laptop')) || [
+        {
+            id: '1',
+            date: '2026-03-18',
+            name: 'ဦးမောင်မောင်',
+            size: '16',
+            gems: 'စိန်ကွင်း ၁ ကာရက်',
+            photo: '',
+            phone: '09123456789',
+            status: 'completed'
+        },
+        {
+            id: '2',
+            date: '2026-03-19',
+            name: 'ဒေါ်လှလှ',
+            size: '1.5',
+            gems: 'ပတ္တမြား လက်စွပ်',
+            photo: '',
+            phone: '09987654321',
+            status: 'pending'
+        },
+        {
+            id: '3',
+            date: '2026-03-20',
+            name: 'ကိုအောင်ကို',
+            size: '20',
+            gems: 'မြကျောက် လက်စွပ်',
+            photo: '',
+            phone: '09791122334',
+            status: 'pending'
+        }
+    ];
+
+    let editingId = null;
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let selectedIds = new Set();
+    let confirmCallback = null;
+
+    window.onload = function() {
+        const savedTitle = localStorage.getItem('jewel_shop_title');
+        if (savedTitle) {
+            document.getElementById('shopTitle').value = savedTitle;
+        }
+        document.getElementById('inputDate').valueAsDate = new Date();
+        renderTable();
+    };
+
+    function saveTitle(val) {
+        localStorage.setItem('jewel_shop_title', val);
+    }
+
+    function saveOrders() {
+        localStorage.setItem('jewel_orders_laptop', JSON.stringify(orders));
+        renderTable();
+    }
+
+    function setFilter(filterType) {
+        currentFilter = filterType;
+        selectedIds.clear();
+        
+        const btnAll = document.getElementById('filterAll');
+        const btnPending = document.getElementById('filterPending');
+        const btnCompleted = document.getElementById('filterCompleted');
+
+        [btnAll, btnPending, btnCompleted].forEach(btn => {
+            btn.className = "px-3 py-1.5 rounded-xl border text-xs font-semibold bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 transition";
+        });
+
+        if (filterType === 'all') {
+            btnAll.className = "px-3 py-1.5 rounded-xl border text-xs font-semibold bg-amber-500 text-white border-amber-500 shadow-sm transition";
+        } else if (filterType === 'pending') {
+            btnPending.className = "px-3 py-1.5 rounded-xl border text-xs font-semibold bg-amber-500 text-white border-amber-500 shadow-sm transition";
+        } else if (filterType === 'completed') {
+            btnCompleted.className = "px-3 py-1.5 rounded-xl border text-xs font-semibold bg-emerald-600 text-white border-emerald-600 shadow-sm transition";
+        }
+
+        renderTable();
+    }
+
+    function handleSearch() {
+        searchQuery = document.getElementById('searchQuery').value.trim().toLowerCase();
+        renderTable();
+    }
+
+    function updateStats() {
+        const total = orders.length;
+        const pending = orders.filter(o => o.status === 'pending').length;
+        const completed = orders.filter(o => o.status === 'completed').length;
+
+        document.getElementById('countAll').innerText = total;
+        document.getElementById('countPending').innerText = pending;
+        document.getElementById('countCompleted').innerText = completed;
+
+        const delSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        
+        if (selectedIds.size > 0) {
+            delSelectedBtn.classList.remove('hidden');
+            selectedCountSpan.innerText = selectedIds.size;
+        } else {
+            delSelectedBtn.classList.add('hidden');
+        }
+    }
+
+    function renderTable() {
+        updateStats();
+        const tbody = document.getElementById('tableBody');
+        const emptyMsg = document.getElementById('emptyMessage');
+        tbody.innerHTML = '';
+
+        let filtered = orders;
+
+        // Apply Status Filter
+        if (currentFilter === 'pending') {
+            filtered = filtered.filter(o => o.status === 'pending');
+        } else if (currentFilter === 'completed') {
+            filtered = filtered.filter(o => o.status === 'completed');
+        }
+
+        // Apply Search Query Filter
+        if (searchQuery) {
+            filtered = filtered.filter(o => 
+                (o.name && o.name.toLowerCase().includes(searchQuery)) ||
+                (o.phone && o.phone.includes(searchQuery)) ||
+                (o.gems && o.gems.toLowerCase().includes(searchQuery))
+            );
+        }
+
+        if (filtered.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            emptyMsg.classList.add('hidden');
+        }
+
+        filtered.forEach((item) => {
+            const tr = document.createElement('tr');
+            const isFinished = item.status === 'completed';
+            
+            tr.className = isFinished ? "bg-emerald-50/50 hover:bg-emerald-100/50 transition" : "hover:bg-amber-50/40 transition";
+            
+            const photoSrc = item.photo ? item.photo : 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Photo';
+
+            const statusBadgeHtml = isFinished 
+                ? `<button onclick="toggleStatus('${item.id}')" class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-400 text-xs font-bold px-3 py-1 rounded-full shadow-2xs hover:bg-emerald-200 transition" title="နှိပ်၍ မပြီးသေးဘက်သို့ ပြောင်းမည်">
+                    <span class="bg-emerald-600 text-white rounded-full w-4 h-4 inline-flex items-center justify-center text-[10px]">✓</span> 
+                    ပြီးပြီ
+                   </button>`
+                : `<button onclick="toggleStatus('${item.id}')" class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold px-3 py-1 rounded-full shadow-2xs hover:bg-amber-200 transition" title="နှိပ်၍ ပြီးပြီဟု မှတ်သားမည်">
+                    <span class="text-amber-600">⏳</span> မပြီးသေး
+                   </button>`;
+
+            const isChecked = selectedIds.has(item.id) ? 'checked' : '';
+
+            tr.innerHTML = `
+                <td class="py-2.5 px-2 align-middle no-print">
+                    <input type="checkbox" onchange="toggleSelectRow('${item.id}', this.checked)" ${isChecked} class="rounded cursor-pointer w-4 h-4 accent-amber-500">
+                </td>
+                <td class="py-2.5 px-3 align-middle font-medium text-slate-700">${escapeHtml(item.date || '')}</td>
+                <td class="py-2.5 px-3 align-middle text-left font-bold text-slate-900">${escapeHtml(item.name || '')}</td>
+                <td class="py-2.5 px-2 align-middle font-medium">${escapeHtml(item.size || '')}</td>
+                <td class="py-2.5 px-3 align-middle text-left text-slate-700">${escapeHtml(item.gems || '')}</td>
+                <td class="py-2.5 px-2 align-middle">
+                    <div class="flex justify-center">
+                        <img src="${photoSrc}" 
+                             alt="Item Photo" 
+                             onclick="showModal('${photoSrc}')"
+                             class="h-10 w-10 object-cover rounded-lg border border-slate-300 cursor-pointer hover:scale-105 transition shadow-2xs"
+                             onerror="this.src='https://placehold.co/100x100/e2e8f0/64748b?text=Error'">
+                    </div>
+                </td>
+                <td class="py-2.5 px-3 align-middle font-mono text-slate-800">${escapeHtml(item.phone || '')}</td>
+                <td class="py-2.5 px-3 align-middle">${statusBadgeHtml}</td>
+                <td class="py-2.5 px-2 align-middle no-print">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="editOrder('${item.id}')" class="text-blue-600 hover:text-blue-800 p-1.5 rounded-lg hover:bg-blue-50 transition" title="ပြင်ဆင်ရန်">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="confirmDeleteSingle('${item.id}')" class="text-red-600 hover:text-red-800 p-1.5 rounded-lg hover:bg-red-50 transition" title="ဖျက်ရန်">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Update top select all checkbox
+        const selectAllCb = document.getElementById('selectAllCheckbox');
+        if (filtered.length > 0 && filtered.every(o => selectedIds.has(o.id))) {
+            selectAllCb.checked = true;
+        } else {
+            selectAllCb.checked = false;
+        }
+    }
+
+    function toggleSelectRow(id, isChecked) {
+        if (isChecked) {
+            selectedIds.add(id);
+        } else {
+            selectedIds.delete(id);
+        }
+        updateStats();
+    }
+
+    function toggleSelectAll(isChecked) {
+        let filtered = orders;
+        if (currentFilter === 'pending') filtered = filtered.filter(o => o.status === 'pending');
+        if (currentFilter === 'completed') filtered = filtered.filter(o => o.status === 'completed');
+
+        if (isChecked) {
+            filtered.forEach(o => selectedIds.add(o.id));
+        } else {
+            filtered.forEach(o => selectedIds.delete(o.id));
+        }
+        renderTable();
+    }
+
+    function toggleStatus(id) {
+        orders = orders.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    status: item.status === 'completed' ? 'pending' : 'completed'
+                };
+            }
+            return item;
+        });
+        saveOrders();
+    }
+
+    function previewImage(input) {
+        const thumbDiv = document.getElementById('imagePreviewThumb');
+        const thumbImg = document.getElementById('thumbImg');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                thumbImg.src = e.target.result;
+                thumbDiv.classList.remove('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            thumbDiv.classList.add('hidden');
+        }
+    }
+
+    function openConfirmModal(title, msg, onConfirm) {
+        document.getElementById('confirmModalTitle').innerText = title;
+        document.getElementById('confirmModalMsg').innerText = msg;
+        confirmCallback = onConfirm;
+        
+        const modal = document.getElementById('confirmModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        document.getElementById('confirmModalBtn').onclick = function() {
+            if (confirmCallback) confirmCallback();
+            closeConfirmModal();
+        };
+    }
+
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        confirmCallback = null;
+    }
+
+    function confirmDeleteSingle(id) {
+        const item = orders.find(o => o.id === id);
+        const nameText = item ? item.name : 'ဤစာရင်း';
+        openConfirmModal(
+            'စာရင်း ဖျက်ရန် အတည်ပြုပါ',
+            `"${nameText}" ၏ အပ်ထည်စာရင်းကို ဖျက်ပစ်ရန် သေချာပါသလား?`,
+            () => {
+                orders = orders.filter(o => o.id !== id);
+                selectedIds.delete(id);
+                saveOrders();
+            }
+        );
+    }
+
+    function deleteAllCompleted() {
+        const completedCount = orders.filter(o => o.status === 'completed').length;
+        if (completedCount === 0) {
+            openConfirmModal('အသိပေးချက်', 'ဖျက်ရန် ပြီးစီးပြီးသား စာရင်းများ မရှိသေးပါ။', () => {});
+            return;
+        }
+
+        openConfirmModal(
+            'ပြီးစီးပြီးသား စာရင်းများ ဖျက်မည်',
+            `ပြီးစီးသွားသည့် အပ်ထည် စာရင်းစုစုပေါင်း (${completedCount}) ခုလုံးကို အပြီးတိုင် ဖျက်ပစ်ရန် သေချာပါသလား?`,
+            () => {
+                orders = orders.filter(o => o.status !== 'completed');
+                selectedIds.clear();
+                saveOrders();
+            }
+        );
+    }
+
+    function deleteSelected() {
+        if (selectedIds.size === 0) return;
+
+        openConfirmModal(
+            'ရွေးထားသည်များ ဖျက်မည်',
+            `ရွေးချယ်ထားသော စာရင်း (${selectedIds.size}) ခုကို ဖျက်ပစ်ရန် သေချာပါသလား?`,
+            () => {
+                orders = orders.filter(o => !selectedIds.has(o.id));
+                selectedIds.clear();
+                saveOrders();
+            }
+        );
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+
+        const date = document.getElementById('inputDate').value;
+        const name = document.getElementById('inputName').value;
+        const size = document.getElementById('inputSize').value;
+        const gems = document.getElementById('inputGems').value;
+        const phone = document.getElementById('inputPhone').value;
+        const status = document.getElementById('inputStatus').value;
+        const photoInput = document.getElementById('inputPhoto');
+
+        const processSave = (base64Photo) => {
+            if (editingId) {
+                orders = orders.map(item => {
+                    if (item.id === editingId) {
+                        return {
+                            ...item,
+                            date,
+                            name,
+                            size,
+                            gems,
+                            phone,
+                            status,
+                            photo: base64Photo !== null ? base64Photo : item.photo
+                        };
+                    }
+                    return item;
+                });
+                editingId = null;
+                resetFormUI();
+            } else {
+                const newOrder = {
+                    id: Date.now().toString(),
+                    date,
+                    name,
+                    size,
+                    gems,
+                    phone,
+                    status,
+                    photo: base64Photo || ''
+                };
+                orders.unshift(newOrder);
+            }
+
+            saveOrders();
+            document.getElementById('orderForm').reset();
+            document.getElementById('inputDate').valueAsDate = new Date();
+            document.getElementById('imagePreviewThumb').classList.add('hidden');
+        };
+
+        if (photoInput.files && photoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processSave(e.target.result);
+            };
+            reader.readAsDataURL(photoInput.files[0]);
+        } else {
+            processSave(null);
+        }
+    }
+
+    function editOrder(id) {
+        const item = orders.find(o => o.id === id);
+        if (!item) return;
+
+        editingId = id;
+        document.getElementById('inputDate').value = item.date;
+        document.getElementById('inputName').value = item.name;
+        document.getElementById('inputSize').value = item.size;
+        document.getElementById('inputGems').value = item.gems;
+        document.getElementById('inputPhone').value = item.phone;
+        document.getElementById('inputStatus').value = item.status || 'pending';
+
+        document.getElementById('formHeaderTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-600"></i> အပ်ထည်စာရင်း ပြင်ဆင်ရန်';
+        document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> ပြင်ဆင်ချက် သိမ်းမည်';
+        submitBtn.className = 'w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormUI() {
+        editingId = null;
+        document.getElementById('orderForm').reset();
+        document.getElementById('inputDate').valueAsDate = new Date();
+        document.getElementById('imagePreviewThumb').classList.add('hidden');
+        document.getElementById('formHeaderTitle').innerHTML = '<i class="fa-solid fa-plus-circle text-amber-500"></i> အပ်ထည်စာရင်းသစ် ထည့်သွင်းရန်';
+        document.getElementById('cancelEditBtn').classList.add('hidden');
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> စာရင်းသစ် ထည့်သွင်းမည်';
+        submitBtn.className = 'w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm';
+    }
+
+    function showModal(src) {
+        if (!src || src.includes('placehold.co')) return;
+        document.getElementById('modalImg').src = src;
+        document.getElementById('imageModal').classList.remove('hidden');
+        document.getElementById('imageModal').classList.add('flex');
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').classList.add('hidden');
+        document.getElementById('imageModal').classList.remove('flex');
+    }
+
+    function exportToCSV() {
+        if (orders.length === 0) {
+            openConfirmModal('အသိပေးချက်', 'ဒေါင်းလုဒ်ဆွဲရန် စာရင်းများ မရှိသေးပါ။', () => {});
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "Date,Name,Sizes,Gems,Phone no,Status\n";
+
+        orders.forEach(row => {
+            const statusTxt = row.status === 'completed' ? 'Finished' : 'Pending';
+            const line = [
+                `"${row.date || ''}"`,
+                `"${row.name || ''}"`,
+                `"${row.size || ''}"`,
+                `"${row.gems || ''}"`,
+                `"${row.phone || ''}"`,
+                `"${statusTxt}"`
+            ].join(",");
+            csvContent += line + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Jewelry_Orders_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.innerText = text;
+        return div.innerHTML;
+    }
+</script>
+
+</body>
+</html>
